@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { spawn } = require('child_process');
-const http = require('http');  // Required for proxying MJPEG
+const http = require('http');
 const dotenv = require('dotenv')
 const { URL} = require('url')
 
@@ -17,10 +17,8 @@ app.use(cors());
 
 let flaskStarted = false;
 
-// === Proxy /ping only if Flask is ready ===
 app.get('/ping', async (req, res) => {
-    if (!flaskStarted) {
-    // 👇 This prevents 500 and returns a friendly response
+  if (!flaskStarted) {
     return res.status(200).json({ status: "waiting" });
   }
 
@@ -44,7 +42,7 @@ app.get('/start-gender-classify', async (req, res) => {
     console.log(str)
     if (!flaskStarted && str.includes(`Running on`)) {
         flaskStarted = true;
-        console.log("✅ Flask server is ready.");
+        console.log("Flask server is ready.");
     }
     });
 
@@ -53,7 +51,7 @@ app.get('/start-gender-classify', async (req, res) => {
     console.log(str)
     if (!flaskStarted && str.includes(`Running on`)) {
         flaskStarted = true;
-        console.log("✅ Flask server is ready.");
+        console.log("Flask server is ready.");
     }
     });
 
@@ -61,7 +59,7 @@ app.get('/start-gender-classify', async (req, res) => {
     pythonProcess.on('close', code => {
       flaskStarted = false;
       pythonProcess = null;
-      console.log(`🛑 Flask server stopped`);
+      console.log(`Flask server stopped`);
     });
 
     res.json({ message: "Gender classification started." });
@@ -70,17 +68,14 @@ app.get('/start-gender-classify', async (req, res) => {
   }
 });
 
-
-// === Stop Python Server ===
 app.get('/stop', async (req, res) => {
   if (pythonProcess) {
     try {
-      await fetch(`${backendURL}/shutdown`);  // May fail if Flask exits too fast
+      await fetch(`${backendURL}/shutdown`);
     } catch (error) {
       console.warn("Expected error during shutdown (Flask terminated):", error.message);
     }
 
-    // Always kill the process reference after 1 second
     setTimeout(() => {
       try { pythonProcess.kill(); } catch (e) {}
       pythonProcess = null;
@@ -92,7 +87,6 @@ app.get('/stop', async (req, res) => {
 });
 
 
-// === Proxy Routes to Flask ===
 app.get('/video', (req, res) => {
   if (!flaskStarted) return res.status(503).json({ message: "Flask server not yet started." });
 
@@ -111,7 +105,6 @@ app.get('/video', (req, res) => {
 
     flaskRes.pipe(res);
 
-    // When the stream ends (e.g., Flask shuts down)
     flaskRes.on('end', () => {
       if (!res.writableEnded) {
         try { res.end(); } catch (e) {}
@@ -122,7 +115,7 @@ app.get('/video', (req, res) => {
   proxy.on('error', err => {
     console.error('Error proxying /video:', err.message);
     if (!res.headersSent) {
-      res.sendStatus(502); // ❗Only if headers not already sent
+      res.sendStatus(502);
     } else {
       try { res.end(); } catch (e) {}
     }
@@ -158,7 +151,6 @@ app.get('/gesture', async (req, res) => {
   }
 });
 
-// === Start Express ===
 app.listen(PORT, () => {
-    console.log(`🚀 Express server running at ${backendURL}`);
+    console.log(`Express server running at ${backendURL}`);
 });

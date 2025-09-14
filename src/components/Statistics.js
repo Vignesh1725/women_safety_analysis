@@ -2,7 +2,7 @@ export default function Statistics({stats}) {
 
   return (
     <div className="card statistics">
-      <h2>📊 Statistics</h2>
+      <h2>Statistics</h2>
       
       <div className="stats-grid stats">
         <div className="stat-box">

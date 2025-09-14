@@ -84,7 +84,6 @@ const App = () => {
       const res = await axios.get(`${node_backendURL}/start-gender-classify`);
       console.log(res.data.message);
 
-      // Only show this once
       if (!flaskWaitMessageShown) {
         console.log("Waiting for Flask to be ready...");
         flaskWaitMessageShown = true;

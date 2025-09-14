@@ -29,7 +29,7 @@ const RiskIndicator = ({ stats }) => {
 
   return (
     <div>
-      <h2>⚠️ Risk Level</h2>
+      <h2>Risk Level</h2>
       <p style={{ color: getColor() }} className='stat-box'>
         {risk}
       </p>

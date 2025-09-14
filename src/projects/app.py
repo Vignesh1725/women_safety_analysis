@@ -13,9 +13,9 @@ from tensorflow.keras.preprocessing.image import img_to_array
 import mediapipe as mp
 
 # === Configuration ===
-MODEL_PATH = r'C:\Users\Vigneshkumaran\VSCode_Programs\MERN Stack\React\wsasystem\src\projects\gender_detection.h5'
-PROTOTXT_PATH = r'C:\Users\Vigneshkumaran\VSCode_Programs\MERN Stack\React\wsasystem\src\projects\deploy.prototxt'
-CAFFEMODEL_PATH = r'C:\Users\Vigneshkumaran\VSCode_Programs\MERN Stack\React\wsasystem\src\projects\res10_300x300_ssd_iter_140000.caffemodel'
+MODEL_PATH = r'C:\Users\Vigneshkumaran\VSPrograms\MERN Stack\React\wsasystem\src\projects\gender_detection.h5'
+PROTOTXT_PATH = r'C:\Users\Vigneshkumaran\VSPrograms\MERN Stack\React\wsasystem\src\projects\deploy.prototxt'
+CAFFEMODEL_PATH = r'C:\Users\Vigneshkumaran\VSPrograms\MERN Stack\React\wsasystem\src\projects\res10_300x300_ssd_iter_140000.caffemodel'
 CONFIDENCE_THRESHOLD = 0.5
 FRAME_SKIP = 2
 GENDER_CLASSES = ['Male', 'Female', 'Unknown']
@@ -109,20 +109,31 @@ def classify_gender(face_roi):
     except:
         return "Unknown", 0.0
 
-cap = cv2.VideoCapture(0)
+def init_camera():
+    for idx in range(3):  # try 0, 1, 2
+        cap = cv2.VideoCapture(idx, cv2.CAP_DSHOW)
+        if cap.isOpened():
+            print(f"Camera opened at index {idx}")
+            return cap
+        else:
+            cap.release()
+    print("Error: No working camera found.")
+    return None
 
-# === Frame Generator ===
+cap = init_camera()
+
 def gen_frames():
     global cap, live_gender_counts, should_stop
     should_stop = False
     print("Opening webcam...")
 
     if not cap or not cap.isOpened():
-        cap = cv2.VideoCapture(0)
+        cap = init_camera()
 
     if not cap or not cap.isOpened():
-        print("Error: Could not access the camera.")
+        print("Error: Could not access the camera after retries.")
         return
+    
 
     print("Camera started. Flushing initial frames...")
     for _ in range(10):
@@ -232,5 +243,5 @@ try:
         print("Running on http://0.0.0.0:7000")
         app.run(host='0.0.0.0', port=7000, debug=False, use_reloader=False)
 except Exception as e:
-    print("❗ Flask crashed:", e)
+    print("Flask crashed:", e)
     traceback.print_exc()
